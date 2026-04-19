@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Lab9.White
 {
-    public class Task3 : Lab9.White
+    public class Task3 : White
     {
         private string[,] _replacementTable;
         private string _processedText;
