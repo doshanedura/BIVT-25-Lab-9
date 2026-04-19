@@ -11,27 +11,23 @@ namespace Lab9.White
             _digitTotal = 0;
         }
 
-        public int DigitSum
-        {
-            get
-            {
-                return _digitTotal;
-            }
-        }
-
         public override void Review()
         {
             _digitTotal = ComputeDigitSum(Input);
+            Output = _digitTotal;
         }
 
         private int ComputeDigitSum(string source)
         {
+            if (string.IsNullOrEmpty(source))
+                return 0;
+
             int accumulatedSum = 0;
 
             for (int position = 0; position < source.Length; position++)
             {
                 char currentSymbol = source[position];
-                
+
                 if (currentSymbol >= '0' && currentSymbol <= '9')
                 {
                     accumulatedSum += currentSymbol - '0';
@@ -43,7 +39,7 @@ namespace Lab9.White
 
         public override string ToString()
         {
-            return DigitSum.ToString();
+            return _digitTotal.ToString();
         }
     }
 }
