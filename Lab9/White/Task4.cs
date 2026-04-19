@@ -2,7 +2,7 @@ using System;
 
 namespace Lab9.White
 {
-    public class Task4 : White
+    public class Task4 : Lab9.White
     {
         private int _digitTotal;
 
