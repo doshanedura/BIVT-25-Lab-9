@@ -1,132 +1,198 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
-namespace White
+namespace Lab9.White
 {
     public class Task2 : White
     {
-        private int[,] _syllableMatrix;
+        private int[,] _syllableStats;
 
-        public Task2(string text) : base(text)
-        {
-        }
-
-        protected override object GetDefaultOutput()
-        {
-            return new int[0, 0];
+        public Task2(string text) : base(text) 
+        { 
+            _syllableStats = new int[0, 0];
         }
 
         public override void Review()
         {
-            if (string.IsNullOrWhiteSpace(Input))
-            {
-                SetOutput(new int[0, 0]);
-                return;
-            }
-
-            string[] words = ExtractWords(Input);
-            Dictionary<int, int> syllableCount = new Dictionary<int, int>();
-
-            foreach (string word in words)
-            {
-                int syllables = CountSyllables(word);
-                if (syllableCount.ContainsKey(syllables))
-                    syllableCount[syllables]++;
-                else
-                    syllableCount[syllables] = 1;
-            }
-
-            var sorted = syllableCount.OrderBy(kvp => kvp.Key).ToList();
-            int[,] result = new int[sorted.Count, 2];
-
-            for (int i = 0; i < sorted.Count; i++)
-            {
-                result[i, 0] = sorted[i].Key;
-                result[i, 1] = sorted[i].Value;
-            }
-
-            SetOutput(result);
+            _syllableStats = BuildSyllableMatrix(Input);
         }
 
-        private string[] ExtractWords(string text)
-        {
-            List<string> words = new List<string>();
-            StringBuilder currentWord = new StringBuilder();
+        public int[,] Output => _syllableStats ?? new int[0, 2];
 
-            for (int i = 0; i < text.Length; i++)
+        private int[,] BuildSyllableMatrix(string source)
+        {
+            string[] extractedWords = ExtractValidWords(source);
+            
+            if (extractedWords.Length == 0)
+                return new int[0, 2];
+
+            char[] vowelLetters = GetVowelArray();
+            
+            int[] syllableCounts = new int[extractedWords.Length];
+            int maximumSyllables = 0;
+
+            for (int i = 0; i < extractedWords.Length; i++)
             {
-                char c = text[i];
-                if (char.IsLetter(c) || c == '-' || c == '\'')
+                int vowelQuantity = 0;
+                
+                foreach (char letter in extractedWords[i])
                 {
-                    currentWord.Append(c);
+                    if (ContainsChar(vowelLetters, letter))
+                        vowelQuantity++;
+                }
+
+                if (vowelQuantity == 0)
+                    vowelQuantity = 1;
+
+                syllableCounts[i] = vowelQuantity;
+
+                if (vowelQuantity > maximumSyllables)
+                    maximumSyllables = vowelQuantity;
+            }
+
+            int[,] tempStorage = new int[maximumSyllables, 2];
+
+            for (int i = 0; i < extractedWords.Length; i++)
+            {
+                int syllables = syllableCounts[i];
+                if (syllables > 0)
+                {
+                    tempStorage[syllables - 1, 0] = syllables;
+                    tempStorage[syllables - 1, 1]++;
+                }
+            }
+
+            int nonEmptyRows = 0;
+            for (int i = 0; i < tempStorage.GetLength(0); i++)
+            {
+                if (tempStorage[i, 1] > 0)
+                    nonEmptyRows++;
+            }
+
+            int[,] finalResult = new int[nonEmptyRows, 2];
+            int targetIndex = 0;
+            
+            for (int i = 0; i < tempStorage.GetLength(0); i++)
+            {
+                if (tempStorage[i, 1] > 0)
+                {
+                    finalResult[targetIndex, 0] = tempStorage[i, 0];
+                    finalResult[targetIndex, 1] = tempStorage[i, 1];
+                    targetIndex++;
+                }
+            }
+
+            return finalResult;
+        }
+
+        private string[] ExtractValidWords(string source)
+        {
+            StringBuilder wordBuffer = new StringBuilder();
+            bool wordAfterDigit = false;
+            bool previousWasDigit = false;
+            int validWordCounter = 0;
+
+            for (int position = 0; position < source.Length; position++)
+            {
+                char currentChar = source[position];
+                
+                if (char.IsLetter(currentChar) || currentChar == '-' || currentChar == '\'')
+                {
+                    if (wordBuffer.Length == 0)
+                        wordAfterDigit = previousWasDigit;
+                    wordBuffer.Append(currentChar);
+                    previousWasDigit = false;
                 }
                 else
                 {
-                    if (currentWord.Length > 0)
+                    if (wordBuffer.Length > 0)
                     {
-                        words.Add(currentWord.ToString());
-                        currentWord.Clear();
+                        if (!wordAfterDigit)
+                            validWordCounter++;
+                        wordBuffer.Clear();
                     }
+                    previousWasDigit = char.IsDigit(currentChar);
                 }
             }
+            
+            if (wordBuffer.Length > 0 && !wordAfterDigit)
+                validWordCounter++;
 
-            if (currentWord.Length > 0)
+            string[] wordArray = new string[validWordCounter];
+            wordBuffer.Clear();
+            wordAfterDigit = false;
+            previousWasDigit = false;
+            int currentWordIndex = 0;
+
+            for (int position = 0; position < source.Length; position++)
             {
-                words.Add(currentWord.ToString());
-            }
-
-            return words.ToArray();
-        }
-
-        private int CountSyllables(string word)
-        {
-            int count = 0;
-            bool prevIsVowel = false;
-
-            foreach (char c in word.ToLower())
-            {
-                if (IsVowel(c))
+                char currentChar = source[position];
+                
+                if (char.IsLetter(currentChar) || currentChar == '-' || currentChar == '\'')
                 {
-                    if (!prevIsVowel)
-                    {
-                        count++;
-                        prevIsVowel = true;
-                    }
+                    if (wordBuffer.Length == 0)
+                        wordAfterDigit = previousWasDigit;
+                    wordBuffer.Append(currentChar);
+                    previousWasDigit = false;
                 }
                 else
                 {
-                    prevIsVowel = false;
+                    if (wordBuffer.Length > 0)
+                    {
+                        if (!wordAfterDigit)
+                            wordArray[currentWordIndex++] = wordBuffer.ToString();
+                        wordBuffer.Clear();
+                    }
+                    previousWasDigit = char.IsDigit(currentChar);
                 }
             }
+            
+            if (wordBuffer.Length > 0 && !wordAfterDigit)
+                wordArray[currentWordIndex] = wordBuffer.ToString();
 
-            return count == 0 ? 1 : count;
+            return wordArray;
         }
 
-        private bool IsVowel(char c)
+        private char[] GetVowelArray()
         {
-            char lower = char.ToLower(c);
-            return lower == 'a' || lower == 'e' || lower == 'i' || lower == 'o' || lower == 'u' ||
-                   lower == 'y' || lower == 'а' || lower == 'е' || lower == 'ё' || lower == 'и' ||
-                   lower == 'о' || lower == 'у' || lower == 'ы' || lower == 'э' || lower == 'ю' ||
-                   lower == 'я';
+            return new char[] 
+            { 
+                'а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я',
+                'А', 'Е', 'Ё', 'И', 'О', 'У', 'Ы', 'Э', 'Ю', 'Я',
+                'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'
+            };
+        }
+
+        private bool ContainsChar(char[] targetArray, char searchChar)
+        {
+            for (int i = 0; i < targetArray.Length; i++)
+            {
+                if (targetArray[i] == searchChar)
+                    return true;
+            }
+            return false;
         }
 
         public override string ToString()
         {
-            Review();
-            int[,] matrix = (int[,])Output;
-            if (matrix.GetLength(0) == 0) return "";
+            int[,] matrix = Output;
+            
+            if (matrix.GetLength(0) == 0) 
+                return string.Empty;
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < matrix.GetLength(0); i++)
+            StringBuilder outputBuilder = new StringBuilder();
+
+            for (int row = 0; row < matrix.GetLength(0); row++)
             {
-                sb.Append($"{matrix[i, 0]}:{matrix[i, 1]}");
-                if (i < matrix.GetLength(0) - 1)
-                    sb.AppendLine();
+                outputBuilder.Append(matrix[row, 0]);
+                outputBuilder.Append(':');
+                outputBuilder.Append(matrix[row, 1]);
+                
+                if (row < matrix.GetLength(0) - 1)
+                    outputBuilder.AppendLine();
             }
-            return sb.ToString();
+
+            return outputBuilder.ToString();
         }
     }
 }
