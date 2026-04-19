@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Lab9.White
 {
-    public class Task2 : Lab9.White
+    public class Task2 : White
     {
         private int[,] _syllableStats;
 
