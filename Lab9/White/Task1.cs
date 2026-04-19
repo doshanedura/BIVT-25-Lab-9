@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Lab9.White
 {
-    public class Task1 : White
+    public class Task1 : Lab9.White
     {
         private readonly char[] _punctuationSymbols =
         {
