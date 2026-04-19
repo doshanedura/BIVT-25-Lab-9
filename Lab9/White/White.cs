@@ -1,46 +1,30 @@
 ﻿using System;
 
-namespace Lab9
+namespace Lab9.White
 {
     public abstract class White
     {
-        private string _sourceText;
-        private object? _computedResult;
+        public string Input { get; private set; }
 
-        public string Input 
-        { 
-            get { return _sourceText; }
-            private set { _sourceText = value; }
-        }
+        public virtual object? Output { get; protected set; }
 
-        public object? Output 
-        { 
-            get { return _computedResult; }
-            protected set { _computedResult = value; }
-        }
-
-        protected White(string text)
+        protected White(string input)
         {
-            _sourceText = text;
-            _computedResult = GetDefaultResult();
+            Input = input;
+            Output = GetDefaultOutput();
         }
 
-        protected virtual object? GetDefaultResult()
+        protected virtual object? GetDefaultOutput()
         {
             return null;
         }
 
         public abstract void Review();
 
-        public virtual void ChangeText(string newText)
+        public virtual void ChangeText(string text)
         {
-            _sourceText = newText;
+            Input = text;
             Review();
-        }
-
-        protected void SetResult(object value)
-        {
-            _computedResult = value;
         }
 
         public override abstract string ToString();
