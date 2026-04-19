@@ -14,23 +14,20 @@ namespace Lab9.White
             _processedText = string.Empty;
         }
 
-        public string ResultText
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_processedText))
-                    return Input;
-                return _processedText;
-            }
-        }
-
         public override void Review()
         {
             _processedText = TransformTextWithCodes(Input);
+            Output = _processedText;
         }
 
         private string TransformTextWithCodes(string source)
         {
+            if (string.IsNullOrEmpty(source))
+                return string.Empty;
+
+            if (_replacementTable == null || _replacementTable.GetLength(0) == 0)
+                return source;
+
             StringBuilder outputBuilder = new StringBuilder();
             StringBuilder wordBuffer = new StringBuilder();
 
@@ -79,7 +76,7 @@ namespace Lab9.White
 
         public override string ToString()
         {
-            return ResultText;
+            return _processedText;
         }
     }
 }
