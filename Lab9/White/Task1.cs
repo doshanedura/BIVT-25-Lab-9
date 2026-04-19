@@ -12,22 +12,23 @@ namespace Lab9.White
 
         private readonly char[] _sentenceEndings = { '.', '!', '?' };
 
+        private double _complexityAverage;
+
         public Task1(string text) : base(text)
         {
         }
 
-        public double ComplexityAverage
+        public override void Review()
         {
-            get
-            {
-                if (string.IsNullOrEmpty(Input))
-                    return 0;
-                return ComputeAverageComplexity();
-            }
+            _complexityAverage = ComputeAverageComplexity();
+            Output = _complexityAverage;
         }
 
         private double ComputeAverageComplexity()
         {
+            if (string.IsNullOrEmpty(Input))
+                return 0;
+
             string[] sentences = DivideIntoSentences(Input);
 
             if (sentences.Length == 0)
@@ -147,13 +148,9 @@ namespace Lab9.White
             return false;
         }
 
-        public override void Review()
-        {
-        }
-
         public override string ToString()
         {
-            return ComplexityAverage.ToString();
+            return _complexityAverage.ToString();
         }
     }
 }
