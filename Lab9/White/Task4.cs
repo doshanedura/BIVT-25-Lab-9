@@ -1,42 +1,49 @@
 using System;
 
-namespace White
+namespace Lab9.White
 {
     public class Task4 : White
     {
+        private int _digitTotal;
+
         public Task4(string text) : base(text)
         {
+            _digitTotal = 0;
         }
 
-        protected override object GetDefaultOutput()
+        public int DigitSum
         {
-            return 0;
+            get
+            {
+                return _digitTotal;
+            }
         }
 
         public override void Review()
         {
-            if (string.IsNullOrEmpty(Input))
-            {
-                SetOutput(0);
-                return;
-            }
+            _digitTotal = ComputeDigitSum(Input);
+        }
 
-            int sum = 0;
-            foreach (char c in Input)
+        private int ComputeDigitSum(string source)
+        {
+            int accumulatedSum = 0;
+
+            for (int position = 0; position < source.Length; position++)
             {
-                if (c >= '0' && c <= '9')
+                char currentSymbol = source[position];
+                
+                if (currentSymbol >= '0' && currentSymbol <= '9')
                 {
-                    sum += c - '0';
+                    accumulatedSum += currentSymbol - '0';
                 }
             }
 
-            SetOutput(sum);
+            return accumulatedSum;
         }
 
         public override string ToString()
         {
-            Review();
-            return ((int)Output).ToString();
+            return DigitSum.ToString();
         }
     }
 }
